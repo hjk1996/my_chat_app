@@ -1,6 +1,9 @@
+import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class AuthForm extends StatefulWidget {
   const AuthForm({Key? key}) : super(key: key);
@@ -12,6 +15,7 @@ class AuthForm extends StatefulWidget {
 class _AuthFormState extends State<AuthForm> {
   final _formKey = GlobalKey<FormState>();
 
+  String? _imagePath;
   bool _isLogin = true;
 
   final _emailController = TextEditingController();
@@ -106,7 +110,7 @@ class _AuthFormState extends State<AuthForm> {
       FirebaseFirestore.instance
           .collection('users')
           .doc(UserCredential.user!.uid)
-          .set({"last_login": Timestamp.now()});
+          .update({"last_login": Timestamp.now()});
     } on FirebaseAuthException catch (error) {
       print(error.message);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -120,7 +124,7 @@ class _AuthFormState extends State<AuthForm> {
   Future<void> _signUp() async {
     final bool isValid = _formKey.currentState!.validate();
 
-    if (!isValid) {
+    if (!isValid || _imagePath == null) {
       return;
     }
 
@@ -131,12 +135,19 @@ class _AuthFormState extends State<AuthForm> {
         password: _passwordController.text,
       );
 
+      final userImagesRef = FirebaseStorage.instance.ref('user_images');
+      final uploadSnapshot = await userImagesRef
+          .child("${userCredential.user!.uid}.jpg")
+          .putFile(File(_imagePath!));
+      final downLoadUrl = await uploadSnapshot.ref.getDownloadURL();
+
       FirebaseFirestore.instance
           .collection("users")
           .doc(userCredential.user!.uid)
           .set({
         "e-mail": _emailController.text.trim(),
         "username": _usernameController.text.trim(),
+        "profile_image_url": downLoadUrl,
         "last_login": Timestamp.now()
       });
     } on FirebaseAuthException catch (error) {
@@ -165,6 +176,42 @@ class _AuthFormState extends State<AuthForm> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
+                  if (!_isLogin)
+                    Column(
+                      children: [
+                        CircleAvatar(
+                          radius: 50,
+                          backgroundImage: _imagePath == null
+                              ? null
+                              : FileImage(File(_imagePath!)),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        GestureDetector(
+                          onTap: () async {
+                            final pickedImage = await ImagePicker.platform
+                                .pickImage(source: ImageSource.camera);
+
+                            if (pickedImage != null) {
+                              setState(() {
+                                _imagePath = pickedImage.path;
+                              });
+                            }
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Text('Upload Image'),
+                              Icon(Icons.photo),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  const SizedBox(
+                    height: 20,
+                  ),
                   TextFormField(
                     key: const ValueKey("e-mail"),
                     validator: _validateEmail,
