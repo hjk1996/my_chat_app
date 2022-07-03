@@ -4,6 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+
+import '../../providers/user_info.dart';
 
 class AuthForm extends StatefulWidget {
   const AuthForm({Key? key}) : super(key: key);
@@ -22,6 +25,8 @@ class _AuthFormState extends State<AuthForm> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -101,7 +106,7 @@ class _AuthFormState extends State<AuthForm> {
     }
 
     try {
-      final UserCredential =
+      final userCredential =
           await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: _emailController.text,
         password: _passwordController.text,
@@ -109,8 +114,11 @@ class _AuthFormState extends State<AuthForm> {
 
       FirebaseFirestore.instance
           .collection('users')
-          .doc(UserCredential.user!.uid)
+          .doc(userCredential.user!.uid)
           .update({"last_login": Timestamp.now()});
+
+      await Provider.of<UserInformation>(context, listen: false)
+          .fetchUserInfo(userCredential.user!.uid);
     } on FirebaseAuthException catch (error) {
       print(error.message);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -150,6 +158,9 @@ class _AuthFormState extends State<AuthForm> {
         "profile_image_url": downLoadUrl,
         "last_login": Timestamp.now()
       });
+
+      await Provider.of<UserInformation>(context, listen: false)
+          .fetchUserInfo(userCredential.user!.uid);
     } on FirebaseAuthException catch (error) {
       print(error.message);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -158,6 +169,22 @@ class _AuthFormState extends State<AuthForm> {
         ),
       );
     }
+  }
+
+  Future<void> _submit() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    if (_isLogin) {
+      await _login();
+    } else {
+      await _signUp();
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override
@@ -185,7 +212,7 @@ class _AuthFormState extends State<AuthForm> {
                               ? null
                               : FileImage(File(_imagePath!)),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 10,
                         ),
                         GestureDetector(
@@ -278,9 +305,11 @@ class _AuthFormState extends State<AuthForm> {
                     const SizedBox(
                       height: 20,
                     ),
-                  ElevatedButton(
-                      onPressed: _isLogin ? _login : _signUp,
-                      child: Text(_isLogin ? "Login" : "Sign Up")),
+                  !_isLoading
+                      ? ElevatedButton(
+                          onPressed: _submit,
+                          child: Text(_isLogin ? "Login" : "Sign Up"))
+                      : CircularProgressIndicator(),
                   TextButton(
                       onPressed: () {
                         setState(() {

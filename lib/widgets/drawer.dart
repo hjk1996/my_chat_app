@@ -1,5 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/user_info.dart';
 
 class MyDrawer extends StatelessWidget {
   const MyDrawer({Key? key}) : super(key: key);
@@ -42,7 +46,12 @@ class MyDrawer extends StatelessWidget {
     return Drawer(
       child: ListView(
         children: [
-          DrawerHeader(child: CircleAvatar()),
+          DrawerHeader(
+              child: Consumer<UserInformation>(
+            builder: (context, userInfo, child) => CircleAvatar(
+              backgroundImage: NetworkImage(userInfo.profileUrl!),
+            ),
+          )),
           const SizedBox(
             height: 20,
           ),
