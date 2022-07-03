@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../screens/search_screen.dart';
 import '../screens/creat_chat_room_screen.dart';
 import '../widgets/drawer.dart';
+import '../widgets/chat/chat_list.dart';
 import '../providers/user_info.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -32,7 +33,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("Chat Room"),
+          title: const Text("Chat Rooms"),
           actions: [
             IconButton(
                 onPressed: () {
@@ -41,7 +42,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 icon: const Icon(Icons.search))
           ],
         ),
-        drawer: MyDrawer(),
+        body: ChatList(),
+        drawer: const MyDrawer(),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             Navigator.of(context).pushNamed(CreateChatRoomScreen.routeName);

@@ -4,11 +4,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 
 import './screens/auth_screen.dart';
-import './screens/chat_screen.dart';
+import 'screens/chat_list_screen.dart';
 import './screens/search_screen.dart';
-import './screens/splash_screen.dart';
 import './screens/creat_chat_room_screen.dart';
-import 'widgets/animated_gradient_background.dart';
 import './providers/user_info.dart';
 
 void main() async {
@@ -40,10 +38,10 @@ class MyApp extends StatelessWidget {
               stream: FirebaseAuth.instance.authStateChanges(),
               builder: (ctx, authSnapshot) {
                 if (authSnapshot.hasData) {
-                  return ChatScreen();
+                  return const ChatScreen();
                 }
 
-                return AuthScreen();
+                return const AuthScreen();
               })),
     );
   }

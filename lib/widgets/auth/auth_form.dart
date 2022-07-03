@@ -99,7 +99,6 @@ class _AuthFormState extends State<AuthForm> {
 
   Future<void> _login() async {
     final bool isValid = _formKey.currentState!.validate();
-    print(isValid);
 
     if (!isValid) {
       return;

@@ -1,12 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
-
-import '../providers/user_info.dart';
 
 class CreateChatRoomScreen extends StatefulWidget {
   static const routeName = "/create-chat-room-screen";
@@ -21,18 +16,22 @@ class _CreateChatRoomScreenState extends State<CreateChatRoomScreen> {
   final _descController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  final _titleFocusNode = FocusNode();
+  final _descFocusNode = FocusNode();
+  final _passwordFocusNode = FocusNode();
+
   bool _isLoading = false;
 
   bool get _readyToSubmit {
-    if (_titleController.text.isEmpty || _titleController.text == null) {
+    if (_titleController.text.isEmpty) {
       return false;
     }
 
-    if (_descController.text.isEmpty || _descController.text == null) {
+    if (_descController.text.isEmpty) {
       return false;
     }
 
-    if (_passwordController.text.isEmpty || _passwordController.text == null) {
+    if (_passwordController.text.isEmpty) {
       return false;
     }
 
@@ -40,7 +39,7 @@ class _CreateChatRoomScreenState extends State<CreateChatRoomScreen> {
   }
 
   Future<void> _submit() async {
-    final chatRoomId = Uuid().v4();
+    final chatRoomId = const Uuid().v4();
 
     setState(() {
       _isLoading = true;
@@ -48,6 +47,7 @@ class _CreateChatRoomScreenState extends State<CreateChatRoomScreen> {
 
     try {
       final userId = FirebaseAuth.instance.currentUser!.uid;
+
       await FirebaseFirestore.instance.collection('chats').doc(chatRoomId).set(
         {
           "users": [userId],
@@ -62,16 +62,14 @@ class _CreateChatRoomScreenState extends State<CreateChatRoomScreen> {
       final userDoc =
           FirebaseFirestore.instance.collection('users').doc(userId);
 
-      final userDocSnapshot = await userDoc.get();
-      final userData = userDocSnapshot.data();
+      final userSnapshot = await userDoc.get();
+      final userData = userSnapshot.data();
+      final List userChatList = userData!['userChatList'] ?? [];
+      userChatList.add(chatRoomId);
 
-      final List userChatRoomList = userData!['userChatRoomList'] ?? [];
-      userChatRoomList.add(chatRoomId);
-
-      await userDoc.update({'userChatRoomList': userChatRoomList});
+      await userDoc.update({'userChatList': userChatList});
 
       Navigator.of(context).pop();
-       
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -88,18 +86,30 @@ class _CreateChatRoomScreenState extends State<CreateChatRoomScreen> {
   }
 
   @override
+  void dispose() {
+    _titleFocusNode.dispose();
+    _passwordFocusNode.dispose();
+    _descFocusNode.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
       body: Center(
         child: Padding(
-          padding: EdgeInsets.all(12),
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
           child: ListView(
             children: [
               TextField(
                 controller: _titleController,
                 onChanged: (_) {
                   setState(() {});
+                },
+                focusNode: _titleFocusNode,
+                onSubmitted: (_) {
+                  _passwordFocusNode.requestFocus();
                 },
                 decoration: const InputDecoration(
                   labelText: 'Chat Room Name',
@@ -114,6 +124,10 @@ class _CreateChatRoomScreenState extends State<CreateChatRoomScreen> {
                 onChanged: (_) {
                   setState(() {});
                 },
+                onSubmitted: (_) {
+                  _descFocusNode.requestFocus();
+                },
+                focusNode: _passwordFocusNode,
                 decoration: const InputDecoration(
                   labelText: 'Chat Room Password',
                   border: OutlineInputBorder(),
@@ -128,6 +142,7 @@ class _CreateChatRoomScreenState extends State<CreateChatRoomScreen> {
                 onChanged: (_) {
                   setState(() {});
                 },
+                focusNode: _descFocusNode,
                 decoration: const InputDecoration(
                   labelText: 'Chat Room Description',
                   border: OutlineInputBorder(),

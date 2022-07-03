@@ -42,7 +42,7 @@ class _AnimatedGradientBackgroundState
         body: Stack(
       children: [
         AnimatedContainer(
-          duration: Duration(seconds: 2),
+          duration: const Duration(seconds: 2),
           onEnd: () {
             setState(() {
               index = index + 1;
