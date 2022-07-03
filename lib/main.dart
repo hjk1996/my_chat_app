@@ -5,7 +5,9 @@ import 'package:provider/provider.dart';
 
 import './screens/auth_screen.dart';
 import './screens/chat_screen.dart';
+import './screens/search_screen.dart';
 import './screens/splash_screen.dart';
+import './screens/creat_chat_room_screen.dart';
 import 'widgets/animated_gradient_background.dart';
 import './providers/user_info.dart';
 
@@ -29,6 +31,11 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             primarySwatch: Colors.deepOrange,
           ),
+          routes: {
+            SearchScreen.routeName: (context) => const SearchScreen(),
+            CreateChatRoomScreen.routeName: (context) =>
+                const CreateChatRoomScreen()
+          },
           home: StreamBuilder<User?>(
               stream: FirebaseAuth.instance.authStateChanges(),
               builder: (ctx, authSnapshot) {

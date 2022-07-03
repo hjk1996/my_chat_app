@@ -43,14 +43,27 @@ class MyDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final userInfo = Provider.of<UserInformation>(context, listen: false);
     return Drawer(
       child: ListView(
         children: [
           DrawerHeader(
-              child: Consumer<UserInformation>(
-            builder: (context, userInfo, child) => CircleAvatar(
-              backgroundImage: NetworkImage(userInfo.profileUrl!),
-            ),
+              child: Column(
+            children: [
+              Expanded(
+                child: CircleAvatar(
+                  minRadius: 20,
+                  backgroundImage: NetworkImage(userInfo.profileUrl!),
+                ),
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              Text(
+                userInfo.username!,
+                textAlign: TextAlign.center,
+              ),
+            ],
           )),
           const SizedBox(
             height: 20,

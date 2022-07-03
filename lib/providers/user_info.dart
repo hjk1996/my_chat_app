@@ -13,6 +13,7 @@ class UserInformation with ChangeNotifier {
         await FirebaseFirestore.instance.collection('users').doc(uid).get();
     final userInfo = userSnapshpt.data();
 
+
     eMail = userInfo!['e-mail'];
     username = userInfo['username'];
     profileUrl = userInfo['profile_image_url'];

@@ -1,8 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
+import 'package:provider/provider.dart';
 
+import '../screens/search_screen.dart';
+import '../screens/creat_chat_room_screen.dart';
 import '../widgets/drawer.dart';
+import '../providers/user_info.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({Key? key}) : super(key: key);
@@ -13,14 +16,37 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   @override
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final userProfileUrl = Provider.of<UserInformation>(context).profileUrl;
+
+    if (userProfileUrl == null) {
+      Provider.of<UserInformation>(context)
+          .fetchUserInfo(FirebaseAuth.instance.currentUser!.uid);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Chat Room"),
-      ),
-      drawer: MyDrawer(
-      
-      ),
-    );
+        appBar: AppBar(
+          title: Text("Chat Room"),
+          actions: [
+            IconButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed(SearchScreen.routeName);
+                },
+                icon: const Icon(Icons.search))
+          ],
+        ),
+        drawer: MyDrawer(),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.of(context).pushNamed(CreateChatRoomScreen.routeName);
+          },
+          child: const Icon(Icons.add),
+        ));
   }
 }
