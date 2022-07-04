@@ -1,6 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:my_chat_app/screens/chat_list_screen.dart';
+
+import '../../screens/chat_room_screen.dart';
 
 class ChatList extends StatelessWidget {
   const ChatList({Key? key}) : super(key: key);
@@ -64,8 +67,31 @@ class ChatList extends StatelessWidget {
                 Map<String, dynamic> data =
                     document.data()! as Map<String, dynamic>;
 
-                return ListTile(
-                  title: Text(data['title']),
+                return Container(
+                  decoration: const ShapeDecoration(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(15),
+                      ),
+                    ),
+                  ),
+                  margin: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                  child: Card(
+                    color: Colors.grey[300],
+                    elevation: 6,
+                    child: ListTile(
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (ctx) => ChatRoomScreen(document.id)));
+                      },
+                      title: Text(
+                        data['title'],
+                        style: const TextStyle(fontSize: 25),
+                      ),
+                      subtitle: Text(data['description']),
+                      trailing: Text(data['last_message_time'] ?? ''),
+                    ),
+                  ),
                 );
               }).toList(),
             );
