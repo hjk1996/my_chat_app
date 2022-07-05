@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:my_chat_app/providers/user_info.dart';
 import 'package:provider/provider.dart';
 
+import '../widgets/chat/message_list.dart';
 import '../widgets/chat/message_input_box.dart';
 
 class ChatRoomScreen extends StatelessWidget {
@@ -42,6 +43,8 @@ class ChatRoomScreen extends StatelessWidget {
         final List chatRommUsers = chatRoomData['users'] ?? [];
         final List messages = chatRoomData['messages'] ?? [];
 
+        final String username = Provider.of<UserInformation>(context).username!;
+
         Future<void> _sendMessage(String message) async {
           final messageData = {
             'message': message,
@@ -50,7 +53,7 @@ class ChatRoomScreen extends StatelessWidget {
             'createdAt': Timestamp.now()
           };
 
-          messages.add(messageData);
+          messages.insert(0, messageData);
           await FirebaseFirestore.instance
               .collection("chats")
               .doc(chatRoomId)
@@ -76,23 +79,7 @@ class ChatRoomScreen extends StatelessWidget {
           body: SafeArea(
             child: Column(
               children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      FocusManager.instance.primaryFocus?.unfocus();
-                    },
-                    child: Container(
-                      width: double.infinity,
-                      color: Colors.amber,
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children:
-                              messages.map((message) => Container()).toList(),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+                MessageList(messages: messages, username: username),
                 MessageInputBox(_sendMessage)
               ],
             ),
