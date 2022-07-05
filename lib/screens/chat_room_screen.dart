@@ -1,5 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:my_chat_app/providers/user_info.dart';
+import 'package:provider/provider.dart';
+
+import '../widgets/chat/message_input_box.dart';
 
 class ChatRoomScreen extends StatelessWidget {
   final String chatRoomId;
@@ -36,6 +40,23 @@ class ChatRoomScreen extends StatelessWidget {
 
         final chatRoomTitle = chatRoomData['title'];
         final List chatRommUsers = chatRoomData['users'] ?? [];
+        final List messages = chatRoomData['messages'] ?? [];
+
+        Future<void> _sendMessage(String message) async {
+          final messageData = {
+            'message': message,
+            'username':
+                Provider.of<UserInformation>(context, listen: false).username,
+            'createdAt': Timestamp.now()
+          };
+
+          messages.add(messageData);
+          await FirebaseFirestore.instance
+              .collection("chats")
+              .doc(chatRoomId)
+              .update({"messages": messages});
+        }
+
         return Scaffold(
           appBar: AppBar(
             title: Row(
@@ -56,17 +77,23 @@ class ChatRoomScreen extends StatelessWidget {
             child: Column(
               children: [
                 Expanded(
-                  child: Container(
-                    width: double.infinity,
-                    color: Colors.amber,
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [Text('hi')],
+                  child: GestureDetector(
+                    onTap: () {
+                      FocusManager.instance.primaryFocus?.unfocus();
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      color: Colors.amber,
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children:
+                              messages.map((message) => Container()).toList(),
+                        ),
                       ),
                     ),
                   ),
                 ),
-                TextField()
+                MessageInputBox(_sendMessage)
               ],
             ),
           ),
