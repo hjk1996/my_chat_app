@@ -20,13 +20,20 @@ class _AuthFormState extends State<AuthForm> {
 
   String? _imagePath;
   bool _isLogin = true;
+  bool _isLoading = false;
 
   final _emailController = TextEditingController();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
-  bool _isLoading = false;
+  late UserInformation userInfoProvider;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    userInfoProvider = Provider.of<UserInformation>(context, listen: false);
+  }
 
   @override
   void dispose() {
@@ -105,26 +112,33 @@ class _AuthFormState extends State<AuthForm> {
     }
 
     try {
-      final userCredential =
-          await FirebaseAuth.instance.signInWithEmailAndPassword(
+      await FirebaseAuth.instance
+          .signInWithEmailAndPassword(
         email: _emailController.text,
         password: _passwordController.text,
+      )
+          .then(
+        (userCredential) {
+          return FirebaseFirestore.instance
+              .collection('users')
+              .doc(userCredential.user!.uid)
+              .update(
+            {"last_login": Timestamp.now()},
+          );
+        },
       );
-
-      FirebaseFirestore.instance
-          .collection('users')
-          .doc(userCredential.user!.uid)
-          .update({"last_login": Timestamp.now()});
-
-      await Provider.of<UserInformation>(context, listen: false)
-          .fetchUserInfo(userCredential.user!.uid);
     } on FirebaseAuthException catch (error) {
       print(error.message);
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(error.message!),
         ),
       );
+
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -142,24 +156,26 @@ class _AuthFormState extends State<AuthForm> {
         password: _passwordController.text,
       );
 
-      final userImagesRef = FirebaseStorage.instance.ref('user_images');
-      final uploadSnapshot = await userImagesRef
+      final uploadSnapshot = await FirebaseStorage.instance
+          .ref('user_images')
           .child("${userCredential.user!.uid}.jpg")
           .putFile(File(_imagePath!));
-      final downLoadUrl = await uploadSnapshot.ref.getDownloadURL();
 
-      FirebaseFirestore.instance
+      final downloadUrl = await uploadSnapshot.ref.getDownloadURL();
+
+      await FirebaseFirestore.instance
           .collection("users")
           .doc(userCredential.user!.uid)
-          .set({
-        "e-mail": _emailController.text.trim(),
-        "username": _usernameController.text.trim(),
-        "profile_image_url": downLoadUrl,
-        "last_login": Timestamp.now()
-      });
+          .set(
+        {
+          "e-mail": _emailController.text.trim(),
+          "username": _usernameController.text.trim(),
+          "profile_image_url": downloadUrl,
+          "last_login": Timestamp.now()
+        },
+      );
 
-      await Provider.of<UserInformation>(context, listen: false)
-          .fetchUserInfo(userCredential.user!.uid);
+      // TODO: user 채팅방 목록 가져율 방법 고안하기.
     } on FirebaseAuthException catch (error) {
       print(error.message);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -167,6 +183,10 @@ class _AuthFormState extends State<AuthForm> {
           content: Text(error.message!),
         ),
       );
+
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -180,10 +200,6 @@ class _AuthFormState extends State<AuthForm> {
     } else {
       await _signUp();
     }
-
-    setState(() {
-      _isLoading = false;
-    });
   }
 
   @override

@@ -1,7 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
+
+import '../providers/user_info.dart';
 
 class CreateChatRoomScreen extends StatefulWidget {
   static const routeName = "/create-chat-room-screen";
@@ -50,6 +54,7 @@ class _CreateChatRoomScreenState extends State<CreateChatRoomScreen> {
 
       await FirebaseFirestore.instance.collection('chats').doc(chatRoomId).set(
         {
+          "id": chatRoomId,
           "users": [userId],
           'title': _titleController.text,
           "description": _descController.text,
@@ -58,6 +63,11 @@ class _CreateChatRoomScreenState extends State<CreateChatRoomScreen> {
           "messages": null
         },
       );
+
+      // TO-DO
+      if (!mounted) return;
+      Provider.of<UserInformation>(context, listen: false)
+          .addNewChat(chatRoomId);
 
       final userDoc =
           FirebaseFirestore.instance.collection('users').doc(userId);

@@ -9,8 +9,6 @@ import '../widgets/chat/message_input_box.dart';
 class ChatRoomScreen extends StatelessWidget {
   final String chatRoomId;
 
-
-
   const ChatRoomScreen(this.chatRoomId, {Key? key}) : super(key: key);
 
   @override
@@ -45,7 +43,8 @@ class ChatRoomScreen extends StatelessWidget {
         final List chatRommUsers = chatRoomData['users'] ?? [];
         final List messages = chatRoomData['messages'] ?? [];
 
-        final String username = Provider.of<UserInformation>(context).username!;
+        final String username =
+            Provider.of<UserInformation>(context).username!;
 
         Future<void> _sendMessage(String message) async {
           final messageData = {

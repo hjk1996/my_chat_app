@@ -9,7 +9,7 @@ class MyDrawer extends StatelessWidget {
   const MyDrawer({Key? key}) : super(key: key);
 
   Future<void> _showLogoutDialog(BuildContext context) async {
-    final isLogout = await showDialog<bool>(
+    final isLogout = await showDialog<bool?>(
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -37,13 +37,15 @@ class MyDrawer extends StatelessWidget {
     );
 
     if (isLogout!) {
-      await FirebaseAuth.instance.signOut();
+      await FirebaseAuth.instance.signOut().then(
+            (_) => Provider.of<UserInformation>(context).clearUserInfo(),
+          );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final userInfo = Provider.of<UserInformation>(context, listen: false);
+    final userInfo = Provider.of<UserInformation>(context, listen: true);
     return Drawer(
       child: ListView(
         children: [
@@ -56,7 +58,6 @@ class MyDrawer extends StatelessWidget {
                   backgroundImage: NetworkImage(userInfo.profileUrl!),
                 ),
               ),
-              
               SizedBox(
                 height: 10,
               ),

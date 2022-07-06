@@ -18,16 +18,6 @@ class _SearchScreenState extends State<SearchScreen> {
   final _searchController = TextEditingController();
   List<Map> chatRooms = [];
 
-  List<String> setSearchParam(String caseNumber) {
-    List<String> caseSearchList = [];
-    String temp = "";
-    for (int i = 0; i < caseNumber.length; i++) {
-      temp = temp + caseNumber[i];
-      caseSearchList.add(temp);
-    }
-    return caseSearchList;
-  }
-
   @override
   void dispose() {
     super.dispose();
@@ -53,11 +43,12 @@ class _SearchScreenState extends State<SearchScreen> {
     setState(() {});
   }
 
-  Future<void> _showPasswordDialog(String id, String password) async {
-    final String enteredPassword = await showDialog(
+  Future<void> _showPasswordDialog(
+      String id, String password, List users, String userId) async {
+    await showDialog(
       context: context,
       builder: (ctx) {
-        return PasswordDialog(id, password);
+        return PasswordDialog(id, password, users, userId);
       },
     );
   }
@@ -98,7 +89,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           border: InputBorder.none,
                           hintText: "Enter chat room name."),
                     )),
-                    IconButton(onPressed: null, icon: const Icon(Icons.search))
+                    const Icon(Icons.search)
                   ],
                 ),
               ),
@@ -107,7 +98,7 @@ class _SearchScreenState extends State<SearchScreen> {
           if (chatRooms.isNotEmpty)
             Expanded(
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 18),
+                padding: const EdgeInsets.symmetric(horizontal: 18),
                 child: ListView.builder(
                     itemCount: chatRooms.length,
                     itemBuilder: (context, index) {
@@ -117,8 +108,8 @@ class _SearchScreenState extends State<SearchScreen> {
                       final List users = chatRoomInfo['users'];
                       final String chatRoomId = chatRoomInfo['uid'];
                       final String password = chatRoomInfo['password'];
-                      final bool isIn = users
-                          .contains(FirebaseAuth.instance.currentUser!.uid);
+
+                      final bool isIn = users.contains(userId);
 
                       return Card(
                         elevation: 5,
@@ -137,7 +128,8 @@ class _SearchScreenState extends State<SearchScreen> {
                                 ),
                               );
                             } else {
-                              await _showPasswordDialog(chatRoomId, password);
+                              await _showPasswordDialog(
+                                  chatRoomId, password, users, userId);
                             }
                           },
                         ),

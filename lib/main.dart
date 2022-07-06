@@ -38,6 +38,7 @@ class MyApp extends StatelessWidget {
               stream: FirebaseAuth.instance.authStateChanges(),
               builder: (ctx, authSnapshot) {
                 if (authSnapshot.hasData) {
+
                   return const ChatScreen();
                 }
 
