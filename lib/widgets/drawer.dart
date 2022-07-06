@@ -56,6 +56,7 @@ class MyDrawer extends StatelessWidget {
                   backgroundImage: NetworkImage(userInfo.profileUrl!),
                 ),
               ),
+              
               SizedBox(
                 height: 10,
               ),

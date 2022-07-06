@@ -9,6 +9,8 @@ import '../widgets/chat/message_input_box.dart';
 class ChatRoomScreen extends StatelessWidget {
   final String chatRoomId;
 
+
+
   const ChatRoomScreen(this.chatRoomId, {Key? key}) : super(key: key);
 
   @override
