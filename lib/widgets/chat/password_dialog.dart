@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -41,20 +40,38 @@ class _PasswordDialogState extends State<PasswordDialog> {
     try {
       widget.users.add(widget.userId);
 
+      final userDoc =
+          FirebaseFirestore.instance.collection("users").doc(widget.userId);
+
       await FirebaseFirestore.instance
           .collection("chats")
           .doc(widget.uid)
-          .update({"users": widget.users});
-
-      if (!mounted) return;
-
-      Navigator.of(context).pop(passwordController.text);
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (ctx) => ChatRoomScreen(widget.uid),
-        ),
-      );
-    } catch (error) {}
+          .update(
+        {"users": Set.from(widget.users).toList()},
+      ).then(
+        (_) {
+          return userDoc.get();
+        },
+      ).then((userDataSnapshot) {
+        final Map<String, dynamic> userData = userDataSnapshot.data() ?? {};
+        final List userChatList = userData["userChatList"] ?? [];
+        userChatList.add(widget.uid);
+        return userDoc.update(
+          {'userChatList': userChatList},
+        );
+      }).then((_) {
+        Provider.of<UserInformation>(context, listen: false)
+            .addNewChat(widget.uid);
+        Navigator.of(context).pop(passwordController.text);
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (ctx) => ChatRoomScreen(widget.uid),
+          ),
+        );
+      });
+    } catch (error) {
+      print(error);
+    }
   }
 
   @override

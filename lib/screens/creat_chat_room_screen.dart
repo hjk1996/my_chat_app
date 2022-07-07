@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
@@ -77,9 +76,9 @@ class _CreateChatRoomScreenState extends State<CreateChatRoomScreen> {
       final List userChatList = userData!['userChatList'] ?? [];
       userChatList.add(chatRoomId);
 
-      await userDoc.update({'userChatList': userChatList});
-
-      Navigator.of(context).pop();
+      await userDoc.update({'userChatList': userChatList}).then(
+        (_) => Navigator.of(context).pop(),
+      );
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

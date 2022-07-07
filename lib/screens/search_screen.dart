@@ -26,13 +26,12 @@ class _SearchScreenState extends State<SearchScreen> {
 
   //TO-DO: 채팅방 검색기능 구현하기.
   Future<void> _submit() async {
-    print(_searchController.text);
     final chatRoomSnapshot = await FirebaseFirestore.instance
         .collection('chats')
         .where(
           "title",
           isGreaterThanOrEqualTo: _searchController.text,
-          isLessThan: _searchController.text + 'z',
+          isLessThan: "${_searchController.text} z",
         )
         .get();
 

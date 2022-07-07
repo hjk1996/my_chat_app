@@ -174,8 +174,6 @@ class _AuthFormState extends State<AuthForm> {
           "last_login": Timestamp.now()
         },
       );
-
-      // TODO: user 채팅방 목록 가져율 방법 고안하기.
     } on FirebaseAuthException catch (error) {
       print(error.message);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -324,7 +322,7 @@ class _AuthFormState extends State<AuthForm> {
                       ? ElevatedButton(
                           onPressed: _submit,
                           child: Text(_isLogin ? "Login" : "Sign Up"))
-                      : CircularProgressIndicator(),
+                      : const CircularProgressIndicator(),
                   TextButton(
                       onPressed: () {
                         setState(() {

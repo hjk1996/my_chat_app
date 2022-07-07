@@ -42,7 +42,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 icon: const Icon(Icons.search))
           ],
         ),
-        body: ChatList(),
+        body: const ChatList(),
         drawer: const MyDrawer(),
         floatingActionButton: FloatingActionButton(
           onPressed: () {

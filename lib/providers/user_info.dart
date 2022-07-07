@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -45,21 +44,29 @@ class UserInformation with ChangeNotifier {
   Future<void> fetchUserInfo(String uid) async {
     late Map<String, dynamic>? userInfo;
 
-    while (true) {
-      final userSnapshot = await Future.delayed(
-        Duration(seconds: 1),
-        () {
-          return FirebaseFirestore.instance.collection('users').doc(uid).get();
-        },
-      );
-      userInfo = userSnapshot.data();
-      if (userInfo != null) break;
-    }
+    try {
+      while (true) {
+        final userSnapshot = await Future.delayed(
+          const Duration(seconds: 1),
+          () {
+            print(uid);
+            return FirebaseFirestore.instance
+                .collection('users')
+                .doc(uid)
+                .get();
+          },
+        );
+        userInfo = userSnapshot.data();
+        if (userInfo != null) break;
 
-    _eMail = userInfo['e-mail'];
-    _username = userInfo['username'];
-    _profileUrl = userInfo['profile_image_url'];
-    _userChatList = userInfo['userChatList'];
+        _eMail = userInfo!['e-mail'];
+        _username = userInfo['username'];
+        _profileUrl = userInfo['profile_image_url'];
+        _userChatList = userInfo['userChatList'];
+      }
+    } catch (error) {
+      print(error);
+    }
 
     notifyListeners();
   }

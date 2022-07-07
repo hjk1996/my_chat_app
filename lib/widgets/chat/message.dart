@@ -1,7 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
 
 class Message extends StatelessWidget {
   final Map<String, dynamic> message;
@@ -33,7 +30,7 @@ class Message extends StatelessWidget {
           isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
       children: [
         Container(
-          margin: EdgeInsets.symmetric(horizontal: 16),
+          margin: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(username,
               style: TextStyle(color: getTextColor(backgroundColor))),
         ),
@@ -50,10 +47,14 @@ class Message extends StatelessWidget {
                 color: backgroundColor,
                 border: Border.all(),
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(5),
-                  topRight: Radius.circular(5),
-                  bottomLeft: isMe ? Radius.circular(5) : Radius.circular(0),
-                  bottomRight: isMe ? Radius.circular(0) : Radius.circular(5),
+                  topLeft: const Radius.circular(5),
+                  topRight: const Radius.circular(5),
+                  bottomLeft: isMe
+                      ? const Radius.circular(5)
+                      : const Radius.circular(0),
+                  bottomRight: isMe
+                      ? const Radius.circular(0)
+                      : const Radius.circular(5),
                 ),
               ),
               child: Text(message['message'], maxLines: 8, softWrap: true),
